@@ -1,0 +1,71 @@
+from V import V
+from WindowSingleton import WindowSingleton
+from graphics import update as refresh
+from graphics import Circle, Point, color_rgb, Rectangle
+from time import time
+from Orrery import Orrery
+from Celestial import Celestial
+from GNA import GNA
+
+def decreaseDeviationCallback(self):
+    self.stdDev /= 1.1
+
+def decreaseDtCallback(self):
+    if self.epoch == 2:
+        for i in self.populates:
+            i.startingDt = .02
+            i.dt = .02
+        print("Updated dt of populates to be: " + str(self.populates[0].dt))
+    if self.epoch == 4:
+        for i in self.populates:
+            i.startingDt = .01
+            i.dt = .01
+        print("Updated dt of populates to be: " + str(self.populates[0].dt))
+
+def decreasePopulationCallback(self):
+    if self.epoch == 3:
+        self.familySizes = [50, 45, 30, 30, 25, 20, 20, 15, 15, 10, 10, 10, 5, 5, 5, 5]
+        print("Updated family sizes for next generation to be: [50, 45, 30, 30, 25, 20, 20, 15, 15, 10, 10, 10, 5, 5, 5, 5] (sum: " 
+            + str(sum(self.familySizes)) + ")")
+
+def update(gna):
+    """ Will be called as many times as possible. """
+    gna()
+
+def fixedUpdate():
+    """ Will be called at most _FPS number of times per second. Put costly graphics operations in here. """
+    refresh()
+
+    return
+
+
+if __name__ == '__main__':
+    generation = 0
+
+    # DrawBG()
+    WindowSingleton()
+    # bg color 4, 122, 9
+    WindowSingleton()().setBackground(color_rgb(0, 0, 0))
+    
+    # TODO: only add drawing changes to callstack when update is about to be called
+    timeSinceUpdate = time()
+    _FPS = 30
+    _SPF = 1/_FPS # seconds per frame refresh
+
+    planets = []
+    planets.append(Celestial(V(1, 1, 0), V(0, -.1, 0), 1))
+    planets.append(Celestial(V(-1, -1, 0), V(0, .1, 0), 1))
+    orrerys = []
+    orrerys.append(Orrery(planets))
+    finishedOrrerys = []
+
+    gna = GNA(.03, [70, 65, 50, 50, 45, 40, 40, 35, 35, 30, 30, 30, 25, 25, 25, 15, 15, 5, 5, 5], Orrery, .03, [decreaseDeviationCallback, decreaseDtCallback, decreasePopulationCallback], True)
+
+
+    while True:
+        update(gna)
+
+
+        if time() - timeSinceUpdate > _SPF:
+            timeSinceUpdate = time()
+            fixedUpdate()
