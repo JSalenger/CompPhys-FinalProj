@@ -31,6 +31,7 @@ class Celestial:
         self.radius = .05
 
         self.positionQueue = position
+        self.totalDistanceTraveled = V(0, 0, 0)
 
         self.sphere = Circle(Point(self.position.x, self.position.y), .05)
         self.sphere.setFill(color)
@@ -39,6 +40,9 @@ class Celestial:
         self.color = color
 
         self.died = False
+        self.diedFromBeingTooFar = False
+
+        self.Gmags = []
 
     """
     Adds a "dependency" (a celestial close enough to the body to affect its orbit) to this objects
@@ -73,6 +77,8 @@ class Celestial:
                 continue
                 
             self.dependencies.append(v)
+
+        print(len(self.dependencies))
                 
 
         # print("Dependencies set for planet (" + str(self.id) + "). ; " + str(self.dependencies) + "(" + str(len(self.dependencies)) + ")")
@@ -84,7 +90,7 @@ class Celestial:
 
     :returns: A vector of the next position
     """
-    def putNextPositionInQueue(self, dt: float = .000001) -> V:
+    def putNextPositionInQueue(self, dt: float = .000001, isFirst = False) -> V:
         self.step += 1 # inc. step to mark which position we are on
         # Calculate force of gravity for each item in the 
         for celestial in self.dependencies:
@@ -92,11 +98,25 @@ class Celestial:
             # vector in direction of Other -----> Self
             distance = celestial.position-self.position
             # Calculate magnitude of force of gravity 
-            Gmag = 6.674e-11 * ((celestial.mass * self.mass)/(distance.m * distance.m))
+            Gmag = 6.674 * ((celestial.mass * self.mass)/(distance.m * distance.m))
+
+            self.Gmags.append(Gmag * 1e-5)
+
+            
+            if Gmag > 1e-2:
+                dt = .01
+            elif Gmag > 1e-5:
+                dt = .001
+            elif Gmag > 1e-9:
+                dt = .001
+            else: 
+                dt = .001
+
 
             # completely arbitrary :P
             if Gmag < 7e-13:
                 self.died = True
+                self.diedFromBeingTooFar = True
                 # print("Die from too far")
 
             # Apply the force of gravity to both celestials (if do both is true)
@@ -107,6 +127,10 @@ class Celestial:
             # Calculate approx. for given dt
             self.velocity += acceleration * dt
             self.positionQueue = self.position + self.velocity * dt
+            self.totalDistanceTraveled += abs(self.velocity * dt)
+
+            if isFirst:
+                return dt
         
 
     """

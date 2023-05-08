@@ -32,9 +32,10 @@ def update(gna):
     """ Will be called as many times as possible. """
     gna()
 
-def fixedUpdate():
+def fixedUpdate(gna):
     """ Will be called at most _FPS number of times per second. Put costly graphics operations in here. """
     refresh()
+    gna()
 
     return
 
@@ -52,20 +53,13 @@ if __name__ == '__main__':
     _FPS = 30
     _SPF = 1/_FPS # seconds per frame refresh
 
-    planets = []
-    planets.append(Celestial(V(1, 1, 0), V(0, -.1, 0), 1))
-    planets.append(Celestial(V(-1, -1, 0), V(0, .1, 0), 1))
-    orrerys = []
-    orrerys.append(Orrery(planets))
-    finishedOrrerys = []
-
-    gna = GNA(.03, [70, 65, 50, 50, 45, 40, 40, 35, 35, 30, 30, 30, 25, 25, 25, 15, 15, 5, 5, 5], Orrery, .03, [decreaseDeviationCallback, decreaseDtCallback, decreasePopulationCallback], True)
+    gna = GNA(.03, [1], Orrery, .03, [], True)
 
 
     while True:
-        update(gna)
+        # update(gna)
 
 
         if time() - timeSinceUpdate > _SPF:
             timeSinceUpdate = time()
-            fixedUpdate()
+            fixedUpdate(gna)

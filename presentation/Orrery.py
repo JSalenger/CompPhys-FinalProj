@@ -32,9 +32,12 @@ class Orrery:
         self.dead = False
 
     def update(self):
-        dt = .01
-        for i in self.planets:
-            i.putNextPositionInQueue(dt=dt)
+        dt = .000001
+        for k,v in enumerate(self.planets):
+            if k == 0:
+                dt = v.putNextPositionInQueue(dt=dt, isFirst = True)
+            else:
+                v.putNextPositionInQueue(dt=dt)
 
         for i in self.planets:
             i.draw()
@@ -46,18 +49,20 @@ class Orrery:
 
     @staticmethod
     def createNew(dt):
+        color = color_rgb(int(random() * 255), int(random() * 255), int(random() * 255))
+
         p1 = Celestial(
-            position = V(random() * 5 - 2.5, random() * 5 - 2.5, random() * 5 - 2.5),
-            velocity = V(random() * 10 - 5, random() * 10 - 5, random() * 10 - 5),
+            position = V(-1.2237367491640472, -0.5859305104906942, -0.22394447473542467),
+            velocity = V(0.28470608817335563, 1.3300667271151392, 1.3778707104641272),
             mass = 1,
-            color = color_rgb(int(random() * 255), int(random() * 255), int(random() * 255))
+            color = color
         )
 
         p2 = Celestial(
-            position = V(random() * 5 - 2.5, random() * 5 - 2.5, random() * 5 - 2.5),
-            velocity = V(random() * 10 - 5, random() * 10 - 5, random() * 10 - 5),
+            position = V(-1.9982449565467586, 0.08160775205113513, -1.0274232842417674),
+            velocity = V(-0.28470608817335563, -1.3300667271151392, -1.3778707104641272),
             mass = 1,
-            color = color_rgb(int(random() * 255), int(random() * 255), int(random() * 255))
+            color = color
         )
 
         return Orrery([p1, p2])
@@ -66,14 +71,37 @@ class Orrery:
     def createFrom(prevOrrery, _stdDev, color="red"):
         prevOrrery.tT = 0
         newPlanets = []
+
+        prevVelocity = prevOrrery.planets[0].iVelocity    
+        newVelocity = V(gauss(prevVelocity.x, .5), gauss(prevVelocity.y, .5), gauss(prevVelocity.z, .5))
         
-        for idx,planet in enumerate(prevOrrery.planets):
-            newPlanets.append(Celestial(
-                position = V(gauss(planet.iPosition.x, .5), gauss(planet.iPosition.y, .5), gauss(planet.iPosition.z, .5)),
-                velocity = V(gauss(planet.iVelocity.x, .5), gauss(planet.iVelocity.y, .5), gauss(planet.iVelocity.z, .5)),
+        newPlanets.append(
+            Celestial(
+                position = V(gauss(prevOrrery.planets[0].iPosition.x, .5), gauss(prevOrrery.planets[0].iPosition.y, .5), gauss(prevOrrery.planets[0].iPosition.z, .5)),
+                velocity = newVelocity,
                 mass = 1,
-                color = planet.color
-            ))
+                color = prevOrrery.planets[0].color
+            )
+        )
+
+        newPlanets.append(
+            Celestial(
+                position = V(gauss(prevOrrery.planets[1].iPosition.x, .5), gauss(prevOrrery.planets[1].iPosition.y, .5), gauss(prevOrrery.planets[1].iPosition.z, .5)),
+                velocity = newVelocity * -1,
+                mass = 1,
+                color = prevOrrery.planets[1].color
+            )
+        )
+
+        # for idx,planet in enumerate(prevOrrery.planets):
+
+
+        #     newPlanets.append(Celestial(
+        #         position = V(gauss(planet.iPosition.x, .5), gauss(planet.iPosition.y, .5), gauss(planet.iPosition.z, .5)),
+        #         velocity = V(gauss(planet.iVelocity.x, .5), gauss(planet.iVelocity.y, .5), gauss(planet.iVelocity.z, .5)),
+        #         mass = 1,
+        #         color = planet.color
+        #     ))
             
 
         return Orrery(newPlanets)
@@ -86,6 +114,10 @@ class Orrery:
                 # check if i collided with j
                 if (i.position-j.position).m < i.radius + j.radius and i.id != j.id: 
                     # print("Die from collision")
+                    return True
+                
+                if (i.position-j.position).m > 100 and i.id != j.id: 
+                    # print("Die from too far")
                     return True
             # planets can also die when their forces become negligible but thats checked in each planets update func.
             # so we can check if that became true during any loop
@@ -145,7 +177,11 @@ class Orrery:
             p.undraw()
     
     def getScore(self):
-        return self.tT
+        print(sum(self.planets[0].Gmags) / len(self.planets[0].Gmags))
+        return (.5 * sum(self.planets[0].Gmags) / len(self.planets[0].Gmags)) + .5 * self.planets[0].totalDistanceTraveled.m + (.5 * sum(self.planets[1].Gmags) / len(self.planets[0].Gmags)) + .5 * self.planets[1].totalDistanceTraveled.m
+    
+    def getStats(self):
+        return (self.tT, self.planets[0].totalDistanceTraveled.m, sum(self.planets[0].Gmags) / len(self.planets[0].Gmags))
 
     def __call__(self):
         dead = self.checkDeath()

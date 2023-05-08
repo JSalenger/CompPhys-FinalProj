@@ -79,10 +79,30 @@ class GNA:
             
             v.distances = {k: v for k, v in sorted(v.distances.items(), key=lambda item: item[1].m)}
 
-        print("running time: " + str(time.time() - sTime))
-
+        # print("running time: " + str(time.time() - sTime))
+        print("pre sort idx 0: " + str(sortablePopulates[0].getScore(K, sortablePopulates=sortablePopulates)))
         sortablePopulates.sort(
-            key=lambda x: x.getScore(K, sortablePopulates), reverse=self.reverseScoring)
+            key=lambda x: x.getScore(K, sortablePopulates), reverse=True)
+        
+        print("post sort idx 0: " + str(sortablePopulates[0].getScore(K, sortablePopulates=sortablePopulates)))
+        print("-----")
+        print("Epoch " + str(self.epoch) + " finished.")
+        print("Average Loss: " + str(sum([i.getScore(K, sortablePopulates) for i in sortablePopulates])/len(sortablePopulates)))
+        print("Best Loss: " + str(sortablePopulates[0].getScore(K, sortablePopulates)))
+        print("Worst loss: " + str(sortablePopulates[-1].getScore(K, sortablePopulates)))
+        print("Average Time: " + str(sum([i.populate.getStats()[0] for i in sortablePopulates])/len(sortablePopulates)))
+        print("Best Time: " + str(sortablePopulates[0].populate.getStats()[0]))
+        print("Worst Time: " + str(sortablePopulates[-1].populate.getStats()[0]))
+        print("Average Distance: " + str(sum([i.populate.getStats()[1] for i in sortablePopulates])/len(sortablePopulates)))
+        print("Best Distance: " + str(sortablePopulates[0].populate.getStats()[1]))
+        print("Worst Distance: " + str(sortablePopulates[-1].populate.getStats()[1]))
+        print("Average Avg Force: " + str(sum([i.populate.getStats()[2] for i in sortablePopulates])/len(sortablePopulates)))
+        print("Best Avg Force: " + str(sortablePopulates[0].populate.getStats()[2]))
+        print("Worst Avg Force: " + str(sortablePopulates[-1].populate.getStats()[2]))
+        print("-----")
+    
+
+
 
         tempPopulates = []
         for k, familySize in enumerate(self.familySizes, start=0):
@@ -93,12 +113,6 @@ class GNA:
                     tempPopulates.append(self.PopulateCLS.createFrom(sortablePopulates[k].populate, self.stdDev))
 
 
-        print("-----")
-        print("Epoch " + str(self.epoch) + " finished.")
-        print("Loss: " + str(sortablePopulates[0].getScore(K, sortablePopulates)))
-        print("Worst loss: " + str(sortablePopulates[-1].getScore(K, sortablePopulates)))
-        print("-----")
-
         self.epoch += 1
         self.populatesDead = 0
 
@@ -106,7 +120,7 @@ class GNA:
             k.undraw()
 
         self.populates = tempPopulates
-    
+ 
     def __call__(self):
         for i in self.populates:
             died = i()  # could replace with just "if i()"
