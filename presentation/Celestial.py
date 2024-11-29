@@ -33,7 +33,7 @@ class Celestial:
         self.positionQueue = position
         self.totalDistanceTraveled = V(0, 0, 0)
 
-        self.sphere = Circle(Point(self.position.x, self.position.y), .05)
+        self.sphere = Circle(Point(self.position.x, self.position.y), .1)
         self.sphere.setFill(color)
         self.sphere.draw(WindowSingleton()())
 

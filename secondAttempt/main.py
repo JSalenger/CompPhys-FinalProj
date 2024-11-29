@@ -27,7 +27,7 @@ if __name__ == '__main__':
     _FPS = 30
     _SPF = 1/_FPS # seconds per frame refresh
 
-    gna = GNA([20, 15, 15, 10, 10, 5])
+    gna = GNA([2, 1])
 
     while True:
         gna.update()

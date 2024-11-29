@@ -4,7 +4,7 @@ from graphics import Circle, Point, color_rgb
 from WindowSingleton import WindowSingleton
 
 class Planet:
-    def __init__(self, initialPosition: V, initialVelocity: V, mass: Union[float, int], color: V):
+    def __init__(self, initialPosition: V, initialVelocity: V, mass: Union[float, int], color):
         self.position = initialPosition
         self.initialPosition = initialPosition
 
@@ -14,7 +14,7 @@ class Planet:
         self.acceleration = V(0, 0, 0)
 
         self.mass = mass
-        self.color = color_rgb(int(color.x), int(color.y), int(color.z))
+        self.color = color
 
         self.delta_pos = V(0, 0, 0)
 
@@ -24,8 +24,8 @@ class Planet:
 
         self.radius = .2
 
-        self.sphere = Circle(Point(self.position.x, self.position.y), .05)
-        self.sphere.setFill("red")
+        self.sphere = Circle(Point(self.position.x, self.position.y), .1)
+        self.sphere.setFill(self.color)
         self.sphere.draw(WindowSingleton()())
 
 
@@ -38,6 +38,14 @@ class Planet:
         self.position = self.tempPosition
         self.velocity = self.tempVelocity
         self.acceleration = self.tempAcceleration
+
+    def setColor(self, color):
+        self.sphere.undraw()
+        self.sphere.setFill(color)
+        self.sphere.draw(WindowSingleton()())
+
+    def handleUndraw(self):
+        self.sphere.undraw()
 
     def draw(self):
         self.sphere.move(self.delta_pos.x, self.delta_pos.y)
